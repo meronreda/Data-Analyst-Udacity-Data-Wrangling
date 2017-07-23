@@ -1,0 +1,6 @@
+Here is the link to the map position used. It is a popular tourist destination in Nevada.
+I have visited Las Vegas frequently and am familiar with it so I chose this area for my 
+data wrangling project. 
+
+https://mapzen.com/data/metro-extracts/metro/las-vegas_nevada/
+https://www.openstreetmap.org/relation/170117#map=10/36.2670/-115.3510
