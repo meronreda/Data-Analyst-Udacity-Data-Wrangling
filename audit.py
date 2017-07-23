@@ -28,7 +28,7 @@ def get_element(SAMPLE_FILE, tags=('node', 'way', 'relation')):
             yield elem
             root.clear()
 
-
+# I first ran code on a sample file below before running on my actual osm file for quicker code processing
 with open(SAMPLE_FILE, 'wb') as output:
     output.write('<?xml version="1.0" encoding="UTF-8"?>\n')
     output.write('<osm>\n  ')
@@ -65,8 +65,8 @@ def test():
                      'way': 102846}
 
 
-#if __name__ == "__main__":
-    #test()
+if __name__ == "__main__":
+    test()
 
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
@@ -80,8 +80,6 @@ def audit_street_type(street_types, street_name):
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
-
-
         street_types[street_type] += 1
 
 def print_sorted_dict(d):
@@ -174,6 +172,8 @@ def test():
 if __name__ == "__main__":
     test()
 
+print "audit here"
+
 def get_user(element):
     return
 
@@ -188,7 +188,6 @@ def process_map(filename):
 
     return len(users)
 
-print "Number of unique users that contributed to the map"
 process_map(OSM_FILE)
 
 """
@@ -208,21 +207,26 @@ OSMFILE = OSM_FILE
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 
-expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road",
-            "Trail", "Parkway", "Commons"]
+expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Lane", "Road",
+            "Parkway"]
 
-# UPDATE THIS VARIABLE
+# these were some of the street abreviations found when I did the audit, I will be changing the common ones to make it more standard 
 mapping = { "St": "Street",
             "St.": "Street",
             "Ave": "Avenue",
             "Ave.": "Avenue",
             "AVE": "Avenue",
             "Rd.": "Road",
+            "Rd": "Road",
+            "Ln": "Lane",
+            "Ln.": "Lane",
             "blvd": "Boulevard",
+            "blvd.": "Boulevard",
             "Blvd": "Boulevard",
             "Blvd.": "Boulevard",
             "Pkwy": "Parkway",
             "Cir" : "Circle",
+            "Mt.": "Mountain",
             "Dr" : "Drive"
             }
 
@@ -276,13 +280,13 @@ def audit(osmfile):
 
 street_types, postcodes = audit(OSMFILE)
 
-print "postcodes"
 def update_postcode(postcode):
     #searches for any pattern that contains 5 consecutive numbers 
     #may begin with letters and end with any characters 
     # The 5 consecutive numbers are captured:
     search = re.match(r'^\D*(\d{5}).*',postcode)
     # searches if a match is found (ex. a string with 5 consecutive numbers)
+    
     if search:
         clean_postcode = search.group(1)
         #print "clean_postcode"
@@ -291,10 +295,6 @@ def update_postcode(postcode):
         return clean_postcode 
 for postcode in postcodes:
     print update_postcode(postcode)
-
-
-
-print "end of postcodes"
 
 def update_name(name, mapping):
     unexpected = street_type_re.search(name)
@@ -308,12 +308,14 @@ def update_name(name, mapping):
     replacement = mapping[unexpected]
 
     better_name = re.sub(unexpected, replacement, name)
-    print len(better_name)
+    #print len(better_name)
     return better_name
+    #print better_name
+
 
 def test():
     #st_types = audit(OSM_FILE)
-    assert len(street_types) == 65
+    assert len(street_types) == 66
     pprint.pprint(dict(street_types))
 
     for street_type, ways in street_types.iteritems():
@@ -324,5 +326,7 @@ def test():
                 assert better_name == "S Rainbow Boulevard"
 
 
-#if __name__ == '__main__':
+
+#if __name__ == "__main__":
     #test()
+    

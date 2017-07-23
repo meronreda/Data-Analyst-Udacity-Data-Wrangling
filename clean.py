@@ -38,11 +38,16 @@ mapping = { "St": "Street",
             "Ave.": "Avenue",
             "AVE": "Avenue",
             "Rd.": "Road",
+            "Rd": "Road",
+            "Ln": "Lane",
+            "Ln.": "Lane",
             "blvd": "Boulevard",
+            "blvd.": "Boulevard",
             "Blvd": "Boulevard",
             "Blvd.": "Boulevard",
             "Pkwy": "Parkway",
             "Cir" : "Circle",
+            "Mt.": "Mountain",
             "Dr" : "Drive"
             }
 
