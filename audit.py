@@ -15,6 +15,60 @@ SAMPLE_FILE = "sample.osm"
 
 k = 10 # Parameter: take every k-th top level element
 
+OSMFILE = OSM_FILE
+street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
+
+
+expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Lane", "Road",
+            "Parkway"]
+
+# these were some of the street abreviations found when I did the audit, I will be changing the common ones to make it more standard 
+mapping = { "St": "Street",
+            "St.": "Street",
+            "Ave": "Avenue",
+            "Ave.": "Avenue",
+            "AVE": "Avenue",
+            "Rd.": "Road",
+            "Rd": "Road",
+            "Ln": "Lane",
+            "Ln.": "Lane",
+            "blvd": "Boulevard",
+            "blvd.": "Boulevard",
+            "Blvd": "Boulevard",
+            "Blvd.": "Boulevard",
+            "Pkwy": "Parkway",
+            "Cir" : "Circle",
+            "Mt.": "Mountain",
+            "Dr" : "Drive"
+            }
+
+
+lower = re.compile(r'^([a-z]|_)*$')
+lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
+problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+osm_file = open(OSM_FILE, "r")
+
+street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
+street_types = defaultdict(int)
+
+
+# I first ran code on a sample file below before running on my actual osm file for quicker code processing
+def open(file):
+    with open(SAMPLE_FILE, 'wb') as output:
+        output.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        output.write('<osm>\n  ')
+
+        # Write every kth top level element
+        for i, element in enumerate(get_element(OSM_FILE)):
+            if i % k == 0:
+                output.write(ET.tostring(element, encoding='utf-8'))
+
+        output.write('</osm>')
+
+
 def get_element(SAMPLE_FILE, tags=('node', 'way', 'relation')):
     """Yield element if it is the right type of tag
 
@@ -28,17 +82,6 @@ def get_element(SAMPLE_FILE, tags=('node', 'way', 'relation')):
             yield elem
             root.clear()
 
-# I first ran code on a sample file below before running on my actual osm file for quicker code processing
-with open(SAMPLE_FILE, 'wb') as output:
-    output.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-    output.write('<osm>\n  ')
-
-    # Write every kth top level element
-    for i, element in enumerate(get_element(OSM_FILE)):
-        if i % k == 0:
-            output.write(ET.tostring(element, encoding='utf-8'))
-
-    output.write('</osm>')
 
 def count_tags(filename):
     tags = {}
@@ -68,19 +111,16 @@ def test():
 if __name__ == "__main__":
     test()
 
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-osm_file = open(OSM_FILE, "r")
-
-street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
-street_types = defaultdict(int)
 
 
 def audit_street_type(street_types, street_name):
+    print "here" 
+    print street_name  
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
         street_types[street_type] += 1
+
 
 def print_sorted_dict(d):
     keys = d.keys()
@@ -126,9 +166,6 @@ See the 'process_map' and 'test' functions for examples of the expected format.
 """
 
 
-lower = re.compile(r'^([a-z]|_)*$')
-lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
-problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 
 
 def key_type(element, keys):
@@ -169,16 +206,11 @@ def test():
     assert keys == {'lower': 300441, 'lower_colon': 265414, 'other': 8373, 'problemchars': 0}
 
 
-if __name__ == "__main__":
-    test()
-
-print "audit here"
-
 def get_user(element):
     return
 
 
-def process_map(filename):
+def users(filename):
     users = set()
     for _, element in ET.iterparse(filename):
         uname = element.get('user')
@@ -188,7 +220,6 @@ def process_map(filename):
 
     return len(users)
 
-process_map(OSM_FILE)
 
 """
 Your task in this exercise has two steps:
@@ -203,32 +234,7 @@ Your task in this exercise has two steps:
 """
 
 
-OSMFILE = OSM_FILE
-street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
-
-expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Lane", "Road",
-            "Parkway"]
-
-# these were some of the street abreviations found when I did the audit, I will be changing the common ones to make it more standard 
-mapping = { "St": "Street",
-            "St.": "Street",
-            "Ave": "Avenue",
-            "Ave.": "Avenue",
-            "AVE": "Avenue",
-            "Rd.": "Road",
-            "Rd": "Road",
-            "Ln": "Lane",
-            "Ln.": "Lane",
-            "blvd": "Boulevard",
-            "blvd.": "Boulevard",
-            "Blvd": "Boulevard",
-            "Blvd.": "Boulevard",
-            "Pkwy": "Parkway",
-            "Cir" : "Circle",
-            "Mt.": "Mountain",
-            "Dr" : "Drive"
-            }
 
 def get_element(OSM_FILE, tags=('node', 'way', 'relation')):
     """Yield element if it is the right type of tag"""
@@ -241,6 +247,8 @@ def get_element(OSM_FILE, tags=('node', 'way', 'relation')):
             root.clear()
 
 def audit_street_type(street_types, street_name):
+    print "******************"
+    print street_name
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
@@ -278,23 +286,27 @@ def audit(osmfile):
 
     return street_types, postcodes
 
-street_types, postcodes = audit(OSMFILE)
-
 def update_postcode(postcode):
     #searches for any pattern that contains 5 consecutive numbers 
     #may begin with letters and end with any characters 
     # The 5 consecutive numbers are captured:
-    search = re.match(r'^\D*(\d{5}).*',postcode)
+    search = re.match(r'^\d{5}$',postcode)
+    search2 = re.match(r'^[NV].{2}(\d{5})',postcode)
+    search3 = re.match(r'^[a-zA-z].{6}(\d{5})',postcode)
     # searches if a match is found (ex. a string with 5 consecutive numbers)
     
     if search:
-        clean_postcode = search.group(1)
+        clean_postcode = search.group()
         #print "clean_postcode"
         #print clean_postcode
         # returns `clean_postcode` and exits function
-        return clean_postcode 
-for postcode in postcodes:
-    print update_postcode(postcode)
+        return clean_postcode
+    elif search2:
+        clean_postcode = search2.group(1)
+        return clean_postcode
+    elif search3:
+        clean_postcode = search3.group(1)
+        return clean_postcode
 
 def update_name(name, mapping):
     unexpected = street_type_re.search(name)
@@ -313,7 +325,7 @@ def update_name(name, mapping):
     #print better_name
 
 
-def test():
+def assert_stname():
     #st_types = audit(OSM_FILE)
     assert len(street_types) == 66
     pprint.pprint(dict(street_types))
@@ -327,6 +339,6 @@ def test():
 
 
 
-#if __name__ == "__main__":
-    #test()
+if __name__ == "__main__":
+    audit_street_type()
     
