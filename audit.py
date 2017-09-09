@@ -56,7 +56,7 @@ street_types = defaultdict(int)
 
 
 # I first ran code on a sample file below before running on my actual osm file for quicker code processing
-def open(file):
+def openmyfile(file):
     with open(SAMPLE_FILE, 'wb') as output:
         output.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         output.write('<osm>\n  ')
@@ -88,38 +88,11 @@ def count_tags(filename):
     for event, elem in ET.iterparse(filename, events=("start", "end")):
         if event == 'start':
             if elem.tag in tags:
-                tags[elem.tag] = tags[elem.tag] + 1
+                tags[elem.tag] += 1
             #if it doesn't exist yet that means you need to add a new key and set the count to 1
             else:
                tags[elem.tag] = 1
     return tags
-
-def test():
-
-    tags = count_tags(OSM_FILE)
-    pprint.pprint(tags)
-    assert tags == {'bounds': 1,
-                     'member': 4328,
-                     'nd': 1181889,
-                     'node': 994412,
-                     'osm': 1,
-                     'relation': 558,
-                     'tag': 574228,
-                     'way': 102846}
-
-
-if __name__ == "__main__":
-    test()
-
-
-
-def audit_street_type(street_types, street_name):
-    print "here" 
-    print street_name  
-    m = street_type_re.search(street_name)
-    if m:
-        street_type = m.group()
-        street_types[street_type] += 1
 
 
 def print_sorted_dict(d):
@@ -131,15 +104,6 @@ def print_sorted_dict(d):
 
 def is_street_name(elem):
     return (elem.tag == "tag") and (elem.attrib['k'] == "addr:street")
-
-def audit():
-    for event, elem in ET.iterparse(OSM_FILE):
-        if is_street_name(elem):
-            audit_street_type(street_types, elem.attrib['v'])
-    print_sorted_dict(street_types)
-
-#if __name__ == '__main__':
-    #audit()
 
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
@@ -195,19 +159,6 @@ def process_map(filename):
         keys = key_type(element, keys)
 
     return keys
-
-def test():
-    # You can use another testfile 'map.osm' to look at your solution
-    # Note that the assertion below will be incorrect then.
-    # Note as well that the test function here is only used in the Test Run;
-    # when you submit, your code will be checked against a different dataset.
-    keys = process_map(OSM_FILE)
-    pprint.pprint(keys)
-    assert keys == {'lower': 300441, 'lower_colon': 265414, 'other': 8373, 'problemchars': 0}
-
-
-def get_user(element):
-    return
 
 
 def users(filename):
@@ -268,6 +219,7 @@ def audit_postcode(postcodes, postcode):
     return postcodes
 
 def audit(osmfile):
+    print osmfile
     osm_file = open(osmfile, "r")
     street_types = defaultdict(set)
     postcodes = defaultdict(set)
@@ -340,5 +292,6 @@ def assert_stname():
 
 
 if __name__ == "__main__":
-    audit_street_type()
-    
+    openmyfile("las-vegas_nevada.osm")
+    audit("las-vegas_nevada.osm")
+    process_map("las-vegas_nevada.osm")
