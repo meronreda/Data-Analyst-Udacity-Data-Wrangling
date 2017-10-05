@@ -55,6 +55,7 @@ street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 street_types = defaultdict(int)
 
 
+
 # I first ran code on a sample file below before running on my actual osm file for quicker code processing
 def openmyfile(file):
     with open(SAMPLE_FILE, 'wb') as output:
@@ -93,6 +94,29 @@ def count_tags(filename):
             else:
                tags[elem.tag] = 1
     return tags
+
+def test():
+
+    tags = count_tags(OSM_FILE)
+    pprint.pprint(tags)
+    assert tags == {'bounds': 1,
+                     'member': 4328,
+                     'nd': 1181889,
+                     'node': 994412,
+                     'osm': 1,
+                     'relation': 558,
+                     'tag': 574228,
+                     'way': 102846}
+
+def test2():
+    # You can use another testfile 'map.osm' to look at your solution
+    # Note that the assertion below will be incorrect then.
+    # Note as well that the test function here is only used in the Test Run;
+    # when you submit, your code will be checked against a different dataset.
+    keys = process_map(OSM_FILE)
+    pprint.pprint(keys)
+    assert keys == {'lower': 300441, 'lower_colon': 265414, 'other': 8373, 'problemchars': 0}                     
+
 
 
 def print_sorted_dict(d):
@@ -198,8 +222,8 @@ def get_element(OSM_FILE, tags=('node', 'way', 'relation')):
             root.clear()
 
 def audit_street_type(street_types, street_name):
-    print "******************"
-    print street_name
+    #print "******************"
+    #print street_name
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
@@ -238,19 +262,22 @@ def audit(osmfile):
 
     return street_types, postcodes
 
+street_types, postcodes = audit(OSMFILE)
+
 def update_postcode(postcode):
-    #searches for any pattern that contains 5 consecutive numbers 
-    #may begin with letters and end with any characters 
-    # The 5 consecutive numbers are captured:
+
+    #searches for postcodes that match desired of 5 digits
     search = re.match(r'^\d{5}$',postcode)
+    #searches for postcodes that start w/abbrev. state name 
     search2 = re.match(r'^[NV].{2}(\d{5})',postcode)
+    #searches for postcodes that start with the state name
     search3 = re.match(r'^[a-zA-z].{6}(\d{5})',postcode)
-    # searches if a match is found (ex. a string with 5 consecutive numbers)
+    #searches for postcodes that have a 4 digit code after
+    search4 = re.match(r'^(\d{5})-\d{4}$', postcode)
+
     
     if search:
         clean_postcode = search.group()
-        #print "clean_postcode"
-        #print clean_postcode
         # returns `clean_postcode` and exits function
         return clean_postcode
     elif search2:
@@ -259,6 +286,16 @@ def update_postcode(postcode):
     elif search3:
         clean_postcode = search3.group(1)
         return clean_postcode
+    elif search4:
+        clean_postcode = search4.group(1)
+        return clean_postcode
+
+for postcode in postcodes:
+    print postcode.encode("utf-8")
+    print "updated"
+    print update_postcode(postcode)
+    print "--------"
+    
 
 def update_name(name, mapping):
     unexpected = street_type_re.search(name)
@@ -293,5 +330,8 @@ def assert_stname():
 
 if __name__ == "__main__":
     openmyfile("las-vegas_nevada.osm")
-    audit("las-vegas_nevada.osm")
+    #audit("las-vegas_nevada.osm")
     process_map("las-vegas_nevada.osm")
+    test()
+    test2()
+
